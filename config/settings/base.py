@@ -1,7 +1,7 @@
-
+import os
+import environ
 from .base import *
 from pathlib import Path
-import os, environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +11,17 @@ ROOT_DIR = (
   environ.Path(__file__) - 3
 )  
 APPS_DIR = ROOT_DIR.path("rutuvia_apps")
+
 env = environ.Env()
+
+READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+if READ_DOT_ENV_FILE:
+    # OS environment variables take precedence over variables from .env
+    env.read_env(str(ROOT_DIR.path(".env")))
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,7 +42,6 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = []
 
-# List of local apps
 LOCAL_APPS = [
     "rutuvia_apps.pages.apps.PagesConfig",
     "rutuvia_apps.account.apps.AccountConfig",
@@ -86,7 +95,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.mysql',
-#        'NAME': env('DATABASE_NAME'),
+#        'NAME':  env('DATABASE_NAME'),
 #        'USER': env('DATABASE_USER'),
 #        'PASSWORD': env('DATABASE_PASSWORD'),
 #        'HOST': env('DATABASE_HOST', default='localhost'),
@@ -95,11 +104,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', 
-        'NAME': BASE_DIR / 'db.sqlite3',         
-    }
-}
+     'default': {
+         'ENGINE': 'django.db.backends.sqlite3', 
+         'NAME': BASE_DIR / 'db.sqlite3',         
+     }
+ }
+# DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
+ROOT_URLCONF = "config.urls"
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
+WSGI_APPLICATION = "config.wsgi.application"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -157,6 +174,6 @@ MEDIA_URL = "/media/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-ADMIN_URL = "rutuvia/admin/"
+ADMIN_URL =  'admin' #env("DJANGO_ADMIN_URL")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
